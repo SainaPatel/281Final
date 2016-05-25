@@ -78,7 +78,7 @@ exports.getDocument=function(req,res){
 		
 	
 	var signup=nanoinstance.use("signup");
-	signup.view('getDetails','by_finalexam',{'key':"Hello World #1", 'include_docs':true},function(err, body){
+	signup.view('getDetails','by_finalexam',{'key':"Hello World #2", 'include_docs':true},function(err, body){
 		if(err)
 			{
 			console.log("error"+err);
