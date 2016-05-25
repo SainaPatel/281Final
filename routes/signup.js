@@ -65,9 +65,42 @@ exports.signup=function(req,res){
 
 
 
-exports.getSignUpDetails=function(req,res){
+exports.getDocument=function(req,res){
 	var username=req.param("username");
 	
+	var ipadd=nano.db.use("ipaddress");
+	var instanceip;
+	ipadd.view('getIp','by_name',{key: "ipaddress",'include_docs':true},function(err,body){
+		console.log(body);
+		instanceip=body.rows[0].value.ipaddress;
+		
+		var nanoinstance=require('nano')('http://'+instanceip+':5984/');
+		
+	
+	var signup=nanoinstance.use("signup");
+	signup.view('getDetails','by_finalexam',{'key':"Hello World #1", 'include_docs':true},function(err, body){
+		if(err)
+			{
+			console.log("error"+err);
+			res.send("cannot get details");
+			}else
+				{
+				if(typeof body.rows[0] !== undefined && body.rows[0]!==undefined)
+					{
+					console.log("in not undefined"+body.rows[0]);
+					res.send("Get document"+JSON.stringify(body.rows[0])+" from "+instanceip);
+					}else
+						{
+						res.send("no response at "+instanceip);
+						}
+				}
+	});
+	});
+};
+
+
+
+exports.updateDetails=function(req,res){
 	var ipadd=nano.db.use("ipaddress");
 	var instanceip;
 	ipadd.view('getIp','by_name',{key: "ipaddress",'include_docs':true},function(err,body){
@@ -87,13 +120,20 @@ exports.getSignUpDetails=function(req,res){
 				{
 				if(typeof body.rows[0] !== undefined && body.rows[0]!==undefined)
 					{
-					console.log("in not undefined"+body.rows[0]);
-					res.send("response "+body.rows[0].value.username+" from "+instanceip);
+					signup.insert({"username":"sp","password":body.rows[0].password,_rev:body.rows[0]._rev},body.rows[0]._id,function(err,response){
+						if(err)
+							{
+							console.log("error in updating at"+ipaddress);
+							res.send("error in updating at"+ipaddress);
+							}else{
+								res.send("updated successfully at"+ipaddress);
+							}
+					});
 					}else
 						{
-						res.send("no response at "+instanceip);
+						
 						}
-				}
+					}
 	});
-	});
+});
 };
